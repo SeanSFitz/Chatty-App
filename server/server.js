@@ -20,6 +20,7 @@ let connectedUsers = 0;
 // the ws parameter in the callback.
 wss.on('connection', (ws) => {
   console.log('Client connected');
+  connectedUsers++;
 
   //everything in here happens when ther server gets a message
   ws.on('message', function incoming(data) {
@@ -28,7 +29,6 @@ wss.on('connection', (ws) => {
     let response = transmissionHandler(transmission);
 
     if (response.type === "incomingUserJoined") {
-      connectedUsers +=1;
       response.users = connectedUsers;
     }
 
@@ -41,5 +41,8 @@ wss.on('connection', (ws) => {
   });
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    console.log('Client disconnected');
+    connectedUsers--;
+  });
 });

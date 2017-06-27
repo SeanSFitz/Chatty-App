@@ -18,7 +18,7 @@ class App extends Component {
 
   componentDidMount() {
     console.log("componentDidMount <App />");
-    this.socket =  new WebSocket("ws://localhost:3001", "protocol");
+    this.socket =  new WebSocket("ws://172.46.0.106:3001", "protocol");
       this.socket.onopen = () => {
         console.log('connected');
         this.sendUserJoined();
@@ -89,6 +89,7 @@ class App extends Component {
       <div>
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
+          <span className="user-count">{this.state.users} users online</span>
         </nav>
         <MessageList messages={this.state.messages} />
         <ChatBar username={this.state.currentUser.name}
