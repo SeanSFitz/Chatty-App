@@ -3,7 +3,7 @@ import MessageList from './components/MessageList.jsx';
 import ChatBar from './components/ChatBar.jsx';
 
 let data = {
-  currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
+  currentUser: {name: "Anonymous"}, // optional. if currentUser is not defined, it means the user is Anonymous
   messages: []
 };
 
@@ -20,28 +20,46 @@ class App extends Component {
       this.socket.onopen = () => {
         console.log('connected');
         this.socket.onmessage = () => {
+          console.log(event.data);
           this.addNewMessage(JSON.parse(event.data));
         }
       }
   }
 
-  keyDownHandler(event) {
-    // event.preventDefault();
+  chatInputHandler(event) {
     if (event.keyCode === 13) {
       event.preventDefault();
-      let message = {
-        username: this.state.currentUser.name,
-        content: event.target.value
-      }
+      this.sendMessage(event.target.value);
       event.target.value = "";
-      this.sendMessage(message);
     }
   }
 
-  sendMessage(message) {
+  usernameHandler(event) {
+    if (event.keyCode === 13) {
+      event.preventDefault();
+      this.sendNameChange(event.target.value);
+      this.setState({currentUser: {name: event.target.value}})
+    }
+  }
+
+  sendMessage(input) {
+    let message = {
+      type: "postMessage",
+      username: this.state.currentUser.name,
+      content: input
+    }
+
     this.socket.send(JSON.stringify(message));
   }
 
+  sendNameChange(input) {
+    let message = {
+      type: "postNotification",
+      username: this.state.currentUser.name,
+      newName: input
+    }
+    this.socket.send(JSON.stringify(message));
+  }
 
   addNewMessage(message) {
     let newMessageArray = this.state.messages;
@@ -57,7 +75,9 @@ class App extends Component {
           <a href="/" className="navbar-brand">Chatty</a>
         </nav>
         <MessageList messages={this.state.messages} />
-        <ChatBar currentUser={this.state.currentUser} keyDownHandler={this.keyDownHandler.bind(this)} />
+        <ChatBar username={this.state.currentUser.name}
+          chatInputHandler={this.chatInputHandler.bind(this)}
+          usernameHandler={this.usernameHandler.bind(this)} />
       </div>
     );
   }

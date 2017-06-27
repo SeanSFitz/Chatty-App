@@ -1,9 +1,9 @@
 const express = require('express');
 const SocketServer = require('ws').Server;
-const uuid = require('uuid/v4');
-
+const transmissionHandler = require('./transmission-handler');
 // Set the port to 3001
 const PORT = 3001;
+
 
 // Create a new express server
 const server = express()
@@ -22,14 +22,16 @@ wss.on('connection', (ws) => {
 
   //everything in here happens when ther server gets a message
   ws.on('message', function incoming(data) {
-    let message = JSON.parse(data);
-    message.id = uuid();
-      wss.clients.forEach(function each(client) {
-        if (client.readyState === 1) {
-          console.log('Sending message to all clients');
-          client.send(JSON.stringify(message));
-        }
-      });
+    let transmission = JSON.parse(data);
+
+    let response = transmissionHandler(transmission);
+
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === 1) {
+        console.log('Sending message to all clients');
+        client.send(JSON.stringify(response));
+      }
+    });
   });
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
