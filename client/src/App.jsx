@@ -4,8 +4,10 @@ import ChatBar from './components/ChatBar.jsx';
 
 let data = {
   currentUser: {name: "Anonymous"}, // optional. if currentUser is not defined, it means the user is Anonymous
-  messages: []
+  messages: [],
+  users: 1
 };
+
 
 class App extends Component {
 
@@ -19,9 +21,15 @@ class App extends Component {
     this.socket =  new WebSocket("ws://localhost:3001", "protocol");
       this.socket.onopen = () => {
         console.log('connected');
+        this.sendUserJoined();
+
         this.socket.onmessage = () => {
           console.log(event.data);
-          this.addNewMessage(JSON.parse(event.data));
+          let data = JSON.parse(event.data);
+          this.addNewMessage(data);
+          if (data.type === "incomingUserJoined") {
+            this.setState({users: data.users})
+          }
         }
       }
   }
@@ -54,9 +62,17 @@ class App extends Component {
 
   sendNameChange(input) {
     let message = {
-      type: "postNotification",
+      type: "postNameChange",
       username: this.state.currentUser.name,
       newName: input
+    }
+    this.socket.send(JSON.stringify(message));
+  }
+
+  sendUserJoined() {
+    let message = {
+      type: "postUserJoined",
+      username: this.state.currentUser.name
     }
     this.socket.send(JSON.stringify(message));
   }

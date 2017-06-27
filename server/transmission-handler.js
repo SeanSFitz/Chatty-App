@@ -10,23 +10,39 @@ const makeOutgoingMessage = (message) => {
   return outgoingMessage;
 }
 
-const makeOutgoingNotification = (notification) => {
+const makeNameChangeNotification = (notification) => {
   let outgoingNotification = {
-    type: "incomingNotification",
+    type: "incomingNameChange",
     id: uuid(),
     content: `${notification.username} has change their name to ${notification.newName}`
   }
   return outgoingNotification;
 }
 
-const transmissionHandler = (transmission) => {
-  if (transmission.type === "postMessage") {
-    console.log("Post message recieved.");
-    return makeOutgoingMessage(transmission);
+const makeUserJoinedNotification = (notification) => {
+  let outgoingNotification = {
+    type: "incomingUserJoined",
+    id: uuid(),
+    content: `${notification.username} has joined the chat.`
   }
-  if (transmission.type === "postNotification") {
-    console.log("Post notification recieved");
-    return makeOutgoingNotification(transmission);
+  return outgoingNotification;
+}
+
+
+const transmissionHandler = (transmission) => {
+  switch(transmission.type) {
+    case "postMessage":
+      console.log("Post message recieved.");
+      return makeOutgoingMessage(transmission);
+      break;
+    case "postNameChange":
+      console.log("Post name change notification recieved");
+      return makeNameChangeNotification(transmission);
+      break;
+    case "postUserJoined":
+      console.log("User joined notification recieved");
+      return makeUserJoinedNotification(transmission);
+      break;
   }
 }
 

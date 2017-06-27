@@ -14,6 +14,7 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
+let connectedUsers = 0;
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
@@ -25,6 +26,11 @@ wss.on('connection', (ws) => {
     let transmission = JSON.parse(data);
 
     let response = transmissionHandler(transmission);
+
+    if (response.type === "incomingUserJoined") {
+      connectedUsers +=1;
+      response.users = connectedUsers;
+    }
 
     wss.clients.forEach(function each(client) {
       if (client.readyState === 1) {

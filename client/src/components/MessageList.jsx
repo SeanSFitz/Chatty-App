@@ -11,7 +11,10 @@ class MessageList extends Component {
               if (message.type === "incomingMessage") {
                 return <Message msg={message} key={message.id} />
               }
-              if (message.type === "incomingNotification") {
+              if (message.type === "incomingNameChange") {
+                return <Notification content={message.content} key={message.id} />
+              }
+              if (message.type === "incomingUserJoined") {
                 return <Notification content={message.content} key={message.id} />
               }
             })
