@@ -26,6 +26,11 @@ module.exports = function makeHelpers(userData) {
     },
 
     makeNameChangeNotification: (notification) => {
+      for (let user of userData) {
+        if (user.id === notification.ws_id) {
+          user.name = notification.newName;
+        }
+      }
       let outgoingNotification = {
         type: "incomingNameChange",
         id: uuid(),
