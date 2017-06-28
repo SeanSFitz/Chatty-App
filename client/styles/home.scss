@@ -41,6 +41,10 @@
     .message {
       display: flex;
       padding: 5px;
+
+      img {
+        max-width: 60%;
+      }
     }
 
     .message.system {

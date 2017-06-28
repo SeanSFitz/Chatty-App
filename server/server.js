@@ -30,7 +30,6 @@ wss.on('connection', (ws) => {
     transmission.ws_id = ws.id;
 
     let response = transmissionHandler(transmission);
-    console.log(connectedUsers);
 
     wss.clients.forEach(function each(client) {
       if (client.readyState === 1) {

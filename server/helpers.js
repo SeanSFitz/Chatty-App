@@ -14,6 +14,17 @@ module.exports = function makeHelpers(userData) {
       return outgoingMessage;
     },
 
+    makeOutgoingImage: (message) => {
+      let outgoingImage = {
+        type: "incomingImage",
+        id: uuid(),
+        colour: message.colour,
+        url: message.content,
+        username: message.username
+      }
+      return outgoingImage;
+    },
+
     makeNameChangeNotification: (notification) => {
       let outgoingNotification = {
         type: "incomingNameChange",

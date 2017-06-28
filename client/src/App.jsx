@@ -22,12 +22,17 @@ let newUser = () => {
   }
 }
 
+let isImage = function (input) {
+  if (/[jJ][pP][gG]$/.test(input) || /[pP][nN][gG]$/.test(input) || /[gG][iI][fF]$/.test(input)) {
+    return true;
+  }
+}
+
 class App extends Component {
 
   constructor(props) {
     super(props);
     this.state = data;
-    this.chatInputHandler = this.chatInputHandler.bind(this);
   }
 
   componentDidMount() {
@@ -58,34 +63,10 @@ class App extends Component {
       }
   }
 
-  chatInputHandler(event) {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-      this.sendMessage(event.target.value);
-      event.target.value = "";
-    }
-  }
 
-  usernameHandler(event) {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-      let name = event.target.value;
-      this.sendNameChange(name);
-      this.setState(prevState => {
-        return {
-          ...prevState,
-          currentUser: {
-            ...prevState.currentUser,
-            'name': name
-          }
-        }
-      })
-    }
-  }
-
-  sendMessage(input) {
+  sendMessage = (input) => {
     let message = {
-      type: "postMessage",
+      type: isImage(input) ? "postImage" : "postMessage",
       colour: this.state.currentUser.colour,
       username: this.state.currentUser.name,
       content: input
@@ -94,16 +75,26 @@ class App extends Component {
     this.socket.send(JSON.stringify(message));
   }
 
-  sendNameChange(input) {
+  sendNameChange = (input) => {
     let message = {
       type: "postNameChange",
       username: this.state.currentUser.name,
       newName: input
     }
     this.socket.send(JSON.stringify(message));
+
+    this.setState(prevState => {
+      return {
+        ...prevState,
+        currentUser: {
+          ...prevState.currentUser,
+          'name': input
+        }
+      }
+    })
   }
 
-  sendUserJoined() {
+  sendUserJoined = () => {
     let message = {
       type: "postUserJoined",
       user: this.state.currentUser
@@ -111,7 +102,7 @@ class App extends Component {
     this.socket.send(JSON.stringify(message));
   }
 
-  addNewMessage(message) {
+  addNewMessage = (message) => {
     let newMessageArray = this.state.messages;
     newMessageArray.push(message);
     console.log(newMessageArray);
@@ -127,7 +118,8 @@ class App extends Component {
         </nav>
         <MessageList messages={this.state.messages} user={this.state.currentUser} />
         <ChatBar username={this.state.currentUser.name}
-                 onMessage={this.chatInputHandler.bind(this)} usernameHandler={this.usernameHandler.bind(this)} />
+                 onMessage={this.sendMessage.bind(this)}
+                 onNameChange={this.sendNameChange} />
       </div>
     );
   }

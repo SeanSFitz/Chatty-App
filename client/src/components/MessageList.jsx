@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Message from './Message.jsx';
 import Notification from './Notification.jsx';
+import Image from './Image.jsx';
 
 class MessageList extends Component {
   render() {
@@ -10,6 +11,9 @@ class MessageList extends Component {
             this.props.messages.map((message) => {
               if (message.type === "incomingMessage") {
                 return <Message msg={message} key={message.id} colour={message.colour} />
+              }
+              if (message.type === "incomingImage") {
+                return <Image msg={message} key={message.id} />
               }
               if (message.type === "incomingNameChange") {
                 return <Notification content={message.content} key={message.id} />

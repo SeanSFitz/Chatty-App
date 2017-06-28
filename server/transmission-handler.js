@@ -6,6 +6,10 @@ module.exports = function transmissionHandler(helpers) {
         console.log("Post message recieved.");
         return helpers.makeOutgoingMessage(transmission);
         break;
+      case "postImage":
+        console.log("Post image recieved.");
+        return helpers.makeOutgoingImage(transmission);
+        break;
       case "postNameChange":
         console.log("Post name change notification recieved");
         return helpers.makeNameChangeNotification(transmission);
