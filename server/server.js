@@ -29,6 +29,7 @@ wss.on('connection', (ws) => {
     let transmission = JSON.parse(data);
     transmission.ws_id = ws.id;
 
+    //call the transmission handler that will determine what type of transmission came in and how to transform it
     let response = transmissionHandler(transmission);
 
     wss.clients.forEach(function each(client) {
@@ -49,7 +50,5 @@ wss.on('connection', (ws) => {
         client.send(JSON.stringify(message));
       }
     });
-
-    // delete connectedUsers[ws.id];
   });
 });

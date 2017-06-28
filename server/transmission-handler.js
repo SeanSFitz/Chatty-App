@@ -1,5 +1,5 @@
 module.exports = function transmissionHandler(helpers) {
-
+//determines the type of incoming transmission and passes to the appropriate helper function to transform the response
   return  (transmission) => {
     switch(transmission.type) {
       case "postMessage":

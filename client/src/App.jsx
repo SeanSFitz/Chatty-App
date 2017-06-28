@@ -16,6 +16,7 @@ let randomColour = () => {
 }
 
 let newUser = () => {
+  //create a new Anonymous user with a random color to be associated with their messages
   return {
     name: 'Anonymous',
     colour: randomColour()
@@ -23,6 +24,7 @@ let newUser = () => {
 }
 
 let isImage = function (input) {
+  //checks to see if an input string is a link to an image
   if (/[jJ][pP][gG]$/.test(input) || /[pP][nN][gG]$/.test(input) || /[gG][iI][fF]$/.test(input)) {
     return true;
   }
@@ -40,20 +42,28 @@ class App extends Component {
     this.socket =  new WebSocket("ws://localhost:3001", "protocol");
       this.socket.onopen = () => {
         console.log('connected');
-        console.log(randomColour());
+
+        //add a new randomized user to the state
         this.setState({currentUser: newUser()});
+
+        //send a user joined notification to the server
         this.sendUserJoined();
 
+        //to be called when a message is recieved
         this.socket.onmessage = () => {
-          console.log(event.data);
+          //interpret incoming data
           let data = JSON.parse(event.data);
+          //add the message associated with the data
           this.addNewMessage(data);
+          //call additional functions for messages of specific types
           if (data.type === "incomingUserJoined") {
+            //update users array in state
             this.setState({
               users: data.users,
             })
           }
           if (data.type === "incomingUserExit") {
+            //update users array in state
             this.setState({
               users: data.users,
             })
@@ -65,24 +75,28 @@ class App extends Component {
 
 
   sendMessage = (input) => {
+    //build message object to be sent to server
     let message = {
+      //check if image or message and attach the correct "type"
       type: isImage(input) ? "postImage" : "postMessage",
       colour: this.state.currentUser.colour,
       username: this.state.currentUser.name,
       content: input
     }
-
+    //send to server
     this.socket.send(JSON.stringify(message));
   }
 
   sendNameChange = (input) => {
+    //build message object to be sent to server
     let message = {
       type: "postNameChange",
       username: this.state.currentUser.name,
       newName: input
     }
+    //send to server
     this.socket.send(JSON.stringify(message));
-
+    //set username in state
     this.setState(prevState => {
       return {
         ...prevState,
@@ -95,18 +109,18 @@ class App extends Component {
   }
 
   sendUserJoined = () => {
+    //build message to be sent to server
     let message = {
       type: "postUserJoined",
       user: this.state.currentUser
     }
+    //send message to server
     this.socket.send(JSON.stringify(message));
   }
 
   addNewMessage = (message) => {
-    let newMessageArray = this.state.messages;
-    newMessageArray.push(message);
-    console.log(newMessageArray);
-    this.setState({messages: newMessageArray});
+    //add new message to state
+    this.setState({messages: [...this.state.messages, message]});
   }
 
   render() {

@@ -3,11 +3,10 @@ import React, {Component} from 'react';
 class ChatBar extends Component {
   constructor(props) {
     super(props);
-    // this.chatInputHandler = this.chatInputHandler.bind(this);
   }
 
   chatInputHandler(event) {
-    console.log(event.target.value);
+    //checks to see if input was ENTER key, is so, calls sendMessage from App.jsx via props
     if (event.keyCode === 13) {
       event.preventDefault();
       this.props.onMessage(event.target.value);
@@ -16,7 +15,7 @@ class ChatBar extends Component {
   }
 
   usernameHandler(event) {
-    console.log(event.target.value)
+    //checks to see if input was ENTER key, if so, calls sendNameChange from App.jsx via props
     if (event.keyCode === 13) {
       event.preventDefault();
       let name = event.target.value;
