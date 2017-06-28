@@ -1,11 +1,12 @@
 const express = require('express');
 const SocketServer = require('ws').Server;
 const uuid = require('uuid/v4');
-const transmissionHandler = require('./transmission-handler');
 // Set the port to 3001
 const PORT = 3001;
 
-
+let connectedUsers = [];
+const helpers = require('./helpers')(connectedUsers);
+const transmissionHandler = require('./transmission-handler')(helpers);
 // Create a new express server
 const server = express()
    // Make the express server serve static assets (html, javascript, css) from the /public folder
@@ -29,10 +30,7 @@ wss.on('connection', (ws) => {
     transmission.ws_id = ws.id;
 
     let response = transmissionHandler(transmission);
-
-    // if (response.type === "incomingUserJoined") {
-    //   response.users = connectedUsers;
-    // }
+    console.log(connectedUsers);
 
     wss.clients.forEach(function each(client) {
       if (client.readyState === 1) {
@@ -45,5 +43,14 @@ wss.on('connection', (ws) => {
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => {
     console.log('Client disconnected');
+    let message = helpers.makeUserExitNotification(ws.id);
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === 1) {
+        console.log('Sending message to all clients');
+        client.send(JSON.stringify(message));
+      }
+    });
+
+    // delete connectedUsers[ws.id];
   });
 });

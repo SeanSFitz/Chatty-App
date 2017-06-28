@@ -27,6 +27,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = data;
+    this.chatInputHandler = this.chatInputHandler.bind(this);
   }
 
   componentDidMount() {
@@ -45,13 +46,15 @@ class App extends Component {
           if (data.type === "incomingUserJoined") {
             this.setState({
               users: data.users,
-              currentUser: data.user
             })
           }
+          if (data.type === "incomingUserExit") {
+            this.setState({
+              users: data.users,
+            })
+          }
+
         }
-      }
-      this.socket.onclose = () => {
-        sendUserExit();
       }
   }
 
@@ -83,6 +86,7 @@ class App extends Component {
   sendMessage(input) {
     let message = {
       type: "postMessage",
+      colour: this.state.currentUser.colour,
       username: this.state.currentUser.name,
       content: input
     }
@@ -107,15 +111,6 @@ class App extends Component {
     this.socket.send(JSON.stringify(message));
   }
 
-  sendUserExit() {
-    let message = {
-      type: "postUserExit",
-      user: this.state.currentUser
-    }
-    this.socket.send(JSON.stringify(message));
-  }
-
-
   addNewMessage(message) {
     let newMessageArray = this.state.messages;
     newMessageArray.push(message);
@@ -132,7 +127,7 @@ class App extends Component {
         </nav>
         <MessageList messages={this.state.messages} user={this.state.currentUser} />
         <ChatBar username={this.state.currentUser.name}
-                 chatInputHandler={this.chatInputHandler.bind(this)} usernameHandler={this.usernameHandler.bind(this)} />
+                 onMessage={this.chatInputHandler.bind(this)} usernameHandler={this.usernameHandler.bind(this)} />
       </div>
     );
   }

@@ -9,12 +9,15 @@ class MessageList extends Component {
           {
             this.props.messages.map((message) => {
               if (message.type === "incomingMessage") {
-                return <Message msg={message} key={message.id} colour={this.props.user.colour} />
+                return <Message msg={message} key={message.id} colour={message.colour} />
               }
               if (message.type === "incomingNameChange") {
                 return <Notification content={message.content} key={message.id} />
               }
               if (message.type === "incomingUserJoined") {
+                return <Notification content={message.content} key={message.id} />
+              }
+              if (message.type === "incomingUserExit") {
                 return <Notification content={message.content} key={message.id} />
               }
             })
