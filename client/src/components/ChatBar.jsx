@@ -3,7 +3,9 @@ import React, {Component} from 'react';
 class ChatBar extends Component {
   constructor(props) {
     super(props);
+    // this.chatInputHandler = this.chatInputHandler.bind(this);
   }
+
 
   render() {
     return (

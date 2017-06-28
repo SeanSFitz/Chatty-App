@@ -2,12 +2,25 @@ import React, {Component} from 'react';
 import MessageList from './components/MessageList.jsx';
 import ChatBar from './components/ChatBar.jsx';
 
+const colours = ['#41c6ea', '#64ba4a', '#d83e13', '#b676db', '#f4bc42', '#2c305b', '#2f681c'];
+
 let data = {
-  currentUser: {name: "Anonymous"}, // optional. if currentUser is not defined, it means the user is Anonymous
+  currentUser: {name: "Anonymous", colour: ""}, // optional. if currentUser is not defined, it means the user is Anonymous
   messages: [],
-  users: 1
+  users: []
 };
 
+let randomColour = () => {
+  let index = Math.floor(4*Math.random());
+  return colours[index];
+}
+
+let newUser = () => {
+  return {
+    name: 'Anonymous',
+    colour: randomColour()
+  }
+}
 
 class App extends Component {
 
@@ -18,9 +31,11 @@ class App extends Component {
 
   componentDidMount() {
     console.log("componentDidMount <App />");
-    this.socket =  new WebSocket("ws://172.46.0.106:3001", "protocol");
+    this.socket =  new WebSocket("ws://localhost:3001", "protocol");
       this.socket.onopen = () => {
         console.log('connected');
+        console.log(randomColour());
+        this.setState({currentUser: newUser()});
         this.sendUserJoined();
 
         this.socket.onmessage = () => {
@@ -28,9 +43,15 @@ class App extends Component {
           let data = JSON.parse(event.data);
           this.addNewMessage(data);
           if (data.type === "incomingUserJoined") {
-            this.setState({users: data.users})
+            this.setState({
+              users: data.users,
+              currentUser: data.user
+            })
           }
         }
+      }
+      this.socket.onclose = () => {
+        sendUserExit();
       }
   }
 
@@ -45,8 +66,17 @@ class App extends Component {
   usernameHandler(event) {
     if (event.keyCode === 13) {
       event.preventDefault();
-      this.sendNameChange(event.target.value);
-      this.setState({currentUser: {name: event.target.value}})
+      let name = event.target.value;
+      this.sendNameChange(name);
+      this.setState(prevState => {
+        return {
+          ...prevState,
+          currentUser: {
+            ...prevState.currentUser,
+            'name': name
+          }
+        }
+      })
     }
   }
 
@@ -72,10 +102,19 @@ class App extends Component {
   sendUserJoined() {
     let message = {
       type: "postUserJoined",
-      username: this.state.currentUser.name
+      user: this.state.currentUser
     }
     this.socket.send(JSON.stringify(message));
   }
+
+  sendUserExit() {
+    let message = {
+      type: "postUserExit",
+      user: this.state.currentUser
+    }
+    this.socket.send(JSON.stringify(message));
+  }
+
 
   addNewMessage(message) {
     let newMessageArray = this.state.messages;
@@ -89,12 +128,11 @@ class App extends Component {
       <div>
         <nav className="navbar">
           <a href="/" className="navbar-brand">Chatty</a>
-          <span className="user-count">{this.state.users} users online</span>
+          <span className="user-count">{this.state.users.length} users online</span>
         </nav>
-        <MessageList messages={this.state.messages} />
+        <MessageList messages={this.state.messages} user={this.state.currentUser} />
         <ChatBar username={this.state.currentUser.name}
-          chatInputHandler={this.chatInputHandler.bind(this)}
-          usernameHandler={this.usernameHandler.bind(this)} />
+                 chatInputHandler={this.chatInputHandler.bind(this)} usernameHandler={this.usernameHandler.bind(this)} />
       </div>
     );
   }

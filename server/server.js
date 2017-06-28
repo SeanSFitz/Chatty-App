@@ -1,5 +1,6 @@
 const express = require('express');
 const SocketServer = require('ws').Server;
+const uuid = require('uuid/v4');
 const transmissionHandler = require('./transmission-handler');
 // Set the port to 3001
 const PORT = 3001;
@@ -12,25 +13,26 @@ const server = express()
   .listen(PORT, '0.0.0.0', 'localhost', () => console.log(`Listening on ${ PORT }`));
 
 // Create the WebSockets server
-const wss = new SocketServer({ server });
+const wss = new SocketServer({ server, clientTracking: true});
 
-let connectedUsers = 0;
+// let connectedUsers = [];
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
 wss.on('connection', (ws) => {
-  console.log('Client connected');
-  connectedUsers++;
+  ws.id = uuid();
+  console.log('Client connected ' + ws.id);
 
   //everything in here happens when ther server gets a message
   ws.on('message', function incoming(data) {
     let transmission = JSON.parse(data);
+    transmission.ws_id = ws.id;
 
     let response = transmissionHandler(transmission);
 
-    if (response.type === "incomingUserJoined") {
-      response.users = connectedUsers;
-    }
+    // if (response.type === "incomingUserJoined") {
+    //   response.users = connectedUsers;
+    // }
 
     wss.clients.forEach(function each(client) {
       if (client.readyState === 1) {
@@ -43,6 +45,5 @@ wss.on('connection', (ws) => {
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => {
     console.log('Client disconnected');
-    connectedUsers--;
   });
 });
